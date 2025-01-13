@@ -1,8 +1,7 @@
 # ultrasonic-rewarming-control
 Control codes for the ultrasonic rewarming device developed at UCL for rewarming 2 ml cryovials.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 This folder contains a set of scripts to optimise the control of a tubular 
 transducer driven with a signal generator with the output power read by
 a power meter, and with transducer (and additional temperature sensors) 
@@ -21,8 +20,7 @@ visadev (https://www.mathworks.com/help/instrument/visadev.html)
 Power Meter: 
 Serial commands via GPIB cable
 
-Datalogger:
-% https://uk.mathworks.com/matlabcentral/fileexchange/41800-pico-technology-tc-08-usb-data-acquisition
+Datalogger: https://uk.mathworks.com/matlabcentral/fileexchange/41800-pico-technology-tc-08-usb-data-acquisition
 
 These scripts were tested and used with Matlab 2019a and a Windows computer
 
