@@ -1,12 +1,22 @@
-%% Feedback loop script for ultrasonic rewarming with Tx driven by a keysight
-% signal generator, amplified with an E&I 1020L 200W amplifier, with the
-% electrical power monitored by a Rhode & Schwarz power reflection meter,
-% and the cryovial temperature monitored with the PICO TC-08 data logger
+% REWARMINGCONSTAMP
+% 
+% Script for ultrasonic rewarming with Tx driven at a constant amplitude 
+% by a keysight signal generator, amplified with an E&I 1020L 200W 
+% amplifier, with the electrical power monitored by a Rhode & Schwarz power 
+% reflection meter, and the cryovial temperature monitored with the PICO 
+% TC-08 data logger
 %
-% Author: Rui Xu
-% Last modified: 08/11/24
+% This script will either continuously heat until the timer reaches the
+% defined 'maximum time', or until the cryovial contents reach the defined
+% 'maximum temperature'
+%
+% ABOUT:
+%     Author: Rui Xu
+%     Date: 08/11/24
+%     Last Modified: 13/01/25
 
 clearvars; close all;
+
 %% connect to thermocouple via TC-08 data logger, requires download:
 % https://uk.mathworks.com/matlabcentral/fileexchange/41800-pico-technology-tc-08-usb-data-acquisition
 addpath(genpath('usbtc08'));
@@ -49,14 +59,18 @@ disp('Source Turned On');
 writeline(waveformGenerator, 'OUTPUT1 ON');
 
 % Define warming time
-max_time = 300; % [s]
+max_time = 200; % [s]
+
+% Define maximum cryovial temperature
+max_cryovialtemp = 5;
+cryovialtemp = 0;
+
 % start timer
 tic;
 
 %% Main control loop for warming
 figure; hold on; xlabel('Time [s]'); ylabel('Temperature');
-cryovialtemp = 0;
-while toc < max_time && cryovialtemp < 5
+while toc < max_time && cryovialtemp < max_cryovialtemp
 
     % trigger themocouple measurement
     tdat = usbtc08query(t_handle);
@@ -95,21 +109,27 @@ while toc < max_time && cryovialtemp < 5
         end
     end
 
-    % record time, power, signal amplitude, and temperature data
+    % record time, power, and temperature data
     dataArray(loopNum, :) = [time, forwardPower, absorbedPower, ...
         tdat(1:numthermocouples)'];
     
     if loopNum > 1 && cryovialInsertion == 0 && toc > 5 % let power stabilize
-        % if change in absorbed power greater than 15%, enact PID algorithm
+        
+        % if change in absorbed power greater than 15%, initiate constant
+        % amplitude rewarming
         if (abs(dataArray(loopNum,2) - dataArray(loopNum-1,2)) / abs(dataArray(loopNum-1,2))) > 0.15 
-            % turn on feedback control
+
+            % set flag indicating that cryovial has been inserted
             cryovialInsertion = 1;
-            % reset warming time 
+            
             % measure absorbed power now
             fprintf(NRT, 'SENS0:FUNC:OFF "POWER:FORWARD:AVERAGE"');
             fprintf(NRT, 'SENS0:FUNC:ON "POW:ABS:AVER"'); % want to measure absorbed power
-            % set new diriving voltage
+            
+            % set drive voltage to 'rewarming' value
             writeline(waveformGenerator, ['SOUR1:VOLT ' num2str(insertionVoltage)]);    % Set amplitude [V]
+
+            % reset warming time 
             tic;
         end
     end
@@ -126,7 +146,3 @@ disp('Source Turned Off');
 clear waveformGenerator;
 usbtc08disconnect(t_handle);
 fclose(NRT); clear NRT;
-
-% save results
-filename = 'EFGH.mat';
-save(filename);

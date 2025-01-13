@@ -1,9 +1,19 @@
 function waveformGenerator = KeysightConnection()
-% function to connect to a Keysight oscilloscope using Matlab's visadev
-% method
+% KEYSIGHTCONNECTION
 %
-% Author: Rui Xu
-% Last Modified: 08/12/24
+% function to connect to a Keysight oscilloscope using Matlab's visadev
+% method, and set the signal generator properties up for continuous wave
+% signal generation
+%
+% INPUT: empty, may be modified for instrument address
+%
+% OUTPUT: 
+%     waveformGenerator: visadev object for communication
+%
+% ABOUT:
+%     Author: Rui Xu
+%     Date: 08/12/24
+%     Last Modified: 13/01/25
 
 % Create a VISA-USB object
 waveformGenerator = visadev('USB0::2391::11271::MY52814863::0::INSTR');

@@ -1,9 +1,14 @@
-%% Script to heat cryovial for set time at set signal amplitude and record 
-% transducer temperature. Script uses the Rohde & Schwarz power reflection 
-% meter and the Keysight 33500B waveform generator
+% HEATTRANSDUCER 
+% 
+% Script to heat the transducer at set signal amplitude until the 
+% transducer reaches a desired temperature. This script uses the Keysight 
+% 33500B waveform generator and the TC-08 thermocouple datalogger
 %
-% Author: Rui Xu
-% Last Modified: 12/11/2024
+% ABOUT:
+%     Author: Rui Xu
+%     Date: 12/11/2024
+%     Last Modified: 13/01/24
+
 clearvars;
 
 % connect to keysight signal generator (Keysight 33500B series waveform
@@ -11,11 +16,12 @@ clearvars;
 waveformGenerator = KeysightConnection();
 initAmplitude = 0.2;    % [V]
 txFreq = 474000;        % [Hz]
+
 % Set amplitude [V]
 writeline(waveformGenerator, ['SOUR1:VOLT ' num2str(initAmplitude)]);    
 writeline(waveformGenerator, ['SOUR1:FREQ ' num2str(txFreq)]);
 
-% connect to thermocouple
+% connect to thermocouple via TC-08 datalogger
 addpath(genpath('usbtc08'));
 t_handle = usbtc08connect('TTT', 'C:\Program Files\Pico Technology\SDK');
 warning('off','all'); % TC-08 sampling rate is limited to 5 Hz
@@ -24,7 +30,7 @@ warning('off','all'); % TC-08 sampling rate is limited to 5 Hz
 txTemp = 33; % [deg C]
 txThermo = 0; % [deg C]
 
-% record tx heating rate
+% record transducer temperature
 dataset = zeros(1000,2);
 
 %% turn transducer on until temp threshold met

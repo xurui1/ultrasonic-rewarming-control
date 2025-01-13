@@ -1,10 +1,19 @@
-%% function for getting voltage for an input power
 function voltage = GetVoltageForPower(power)
+% GETVOLTAGEFORPOWER
 %
-% Author: Rui Xu
-% Last Modified: 08/11/24
+% INPUT: 
+%     power: desired absorbed power output for device [W]
+%
+% OUTPUT:
+%     voltage: empirical voltage to obtained desired power [V]
+%
+% About:
+%     Author: Rui Xu
+%     Date: 08/11/24
+%     Last Modified: 13/01/25
 
-% load file
+% load file containing quadratic fit to empirical voltage vs. power
+% measuremnts
 load('VoltageToPower.mat', 'fitcryo');
 
 % solve for voltage using quadratic formula (assumption: a is not 0)

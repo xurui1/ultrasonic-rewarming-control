@@ -1,10 +1,15 @@
-%% Feedback loop script for ultrasonic rewarming with Tx driven by a keysight
+% REWARMINGFEEDBACKCONTROL
+% 
+% Feedback loop script for ultrasonic rewarming with Tx driven by a keysight
 % signal generator, amplified with an E&I 1020L 200W amplifier, with the
 % electrical power monitored by a Rhode & Schwarz power reflection meter,
 % and the cryovial temperature monitored with the PICO TC-08 data logger
 %
-% Author: Rui Xu
-% Last Modified: 08/11/24
+% ABOUT:
+%     Author: Rui Xu
+%     Date: 08/11/24
+%     Last Modified: 13/01/25
+
 clearvars;
 
 %% connect to thermocouple via TC-08 data logger, requires download:
@@ -22,13 +27,18 @@ t_handle = usbtc08connect(thermostring, 'C:\Program Files\Pico Technology\SDK');
 waveformGenerator = KeysightConnection();
 initialVoltage = 0.1; % [V] cryovial sensing voltage
 desiredPower = 20;    % [W]
+
 % get initial driving voltage that corresponds to the desired power
 rewarmVoltage = GetVoltageForPower(desiredPower); % [V] 
-% set threshold for oscillation around assumed voltage required for desired power
+
+% set threshold for oscillation around assumed voltage required for desired 
+% power (avoids excessive corrections that may damage device)
 minVoltage = 0.8 * rewarmVoltage;
 maxVoltage = 1.2 * rewarmVoltage;
+
 % choose device frequency
 freq = 474e3; % [Hz]
+
 % set device voltage and amplitude
 writeline(waveformGenerator, ['SOUR1:VOLT ' num2str(initialVoltage)]);    
 writeline(waveformGenerator, ['SOUR1:FREQ ' num2str(freq) ]);
@@ -38,7 +48,7 @@ NRT = NRT_Connection();
 fprintf(NRT, ['SENS0:FREQUENCY ' num2str(freq)]);
 fprintf(NRT, 'SENS0:FUNCTION:ON "POWER:FORWARD:AVERAGE"');
 
-%% Define the feedback loop parameters (PID controller)
+%% Define the feedback loop parameters (PID algorithm)
 Kp = 0.0002;           % Proportional gain
 Ki = 0.0001;          % Integral gain
 Kd = 0.0001;         % Derivative gain (damping)
@@ -143,7 +153,7 @@ while toc < rw_time % [s]
         end
 
         % Adjust signal generator amplitude based on control signal
-        writeline(waveformGenerator, ['SOUR1:VOLT ' num2str(adjustedVoltage)]);    % Set amplitude [V]
+        writeline(waveformGenerator, ['SOUR1:VOLT ' num2str(adjustedVoltage)]);  
 
         % update initial voltage and previous error
         rewarmVoltage = adjustedVoltage;
@@ -163,7 +173,3 @@ disp('Remove Cryovial');
 clear waveformGenerator;
 usbtc08disconnect(t_handle);
 fclose(NRT);
-
-% save results
-filename = 'ABC.mat';
-save(filename);

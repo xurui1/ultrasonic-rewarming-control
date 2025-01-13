@@ -1,10 +1,13 @@
 function NRT = NRT_Connection()
-% Code written to connect to Rohde&Schwarz NRT Power Reflection Meter via
-% GPIB
+% NRT_CONNECTION
+% 
+% function to connect to Rohde & Schwarz NRT Power Reflection Meter via
+% GPIB interface
 %
-% Author: Rui Xu
-%
-% Last Modified: 08/11/24
+% ABOUT: 
+%     Author: Rui Xu
+%     Date: 08/11/24
+%     Last Modified: 13/01/25
 
 % create GPIB object with correct address, open it
 NRT = gpib('agilent', 7, 12); 
@@ -23,4 +26,4 @@ end
 
 fprintf(NRT, 'SENS0:FUNC:CONC OFF'); % Non-concurrent functions
 
-ends
+end

@@ -1,9 +1,17 @@
-%% Script to heat cryovial for set time at set signal amplitude and record temperature
-% transducer using the Rohde & Schwarz power reflection meter and the
-% Keysight 33500B waveform generator
+% MEASUREPOWERVOLTAGE
 %
-% Author: Rui Xu
-% Last modified: 12/11/2024
+% Use this script to obtain the empirical measurements of drive voltage 
+% versus absorbed electrical power, at a given frequency and transducer
+% temperature. Save quadratic fit to data as 'VoltageToPower.mat'
+% 
+% This script requires the R & S absorbed power meter, Keysight signal
+% generator, and thermocouple datalogger. 
+%
+% ABOUT:
+%     Author: Rui Xu
+%     Date: 12/11/2024
+%     Last Modified: 13/01/25
+
 clearvars;
 
 % connect to thermocouple
@@ -12,14 +20,15 @@ t_handle = usbtc08connect('TTT', 'C:\Program Files\Pico Technology\SDK');
 warning('off','all'); % TC-08 sampling rate is limited to 5 Hz, warnings
 
 
-% connect to keysight signal generator (Keysight 33500B series waveform
-% generator)
+% connect to Keysight 33500B series waveform generator, set parameters
 waveformGenerator = KeysightConnection();
 voltages = 0.01:0.01:0.37; % [V]
 warmingvoltage = 0.2;  % [V]
 freq = 474e3; % [Hz]
-txTemp = 33; % [degC] heat to approx this
 writeline(waveformGenerator, ['SOUR1:FREQ ' num2str(freq)]);
+
+% set transducer characterisation temperature (+/- 0.5 degC)
+txTemp = 33; % [degC] 
 
 % connect to NRT powermeter
 NRT = NRT_Connection();
@@ -31,7 +40,7 @@ fprintf(NRT, 'SENS0:FUNC:ON "POW:ABS:AVER"'); % want to measure absorbed power
 % allocate empty arrays
 AbsorbedPower = zeros(length(voltages), 1); TxTemperature = AbsorbedPower;
 
-%% loop through frequencies and heat, record heating
+%% loop through voltages
 tic; loopnum = 1; txThermo = [];
 for voltagenum = 1:length(voltages)
 
@@ -48,9 +57,10 @@ for voltagenum = 1:length(voltages)
 
     end
 
-    if txThermo < txTemp - 0.5
+    if txThermo < txTemp - 0.5 % lower bound of transducer temperature
         % turn transducer on to warming voltage
-        writeline(waveformGenerator, ['SOUR1:VOLT ' num2str(warmingvoltage)]);    % Set amplitude [V]
+        % Set amplitude [V]
+        writeline(waveformGenerator, ['SOUR1:VOLT ' num2str(warmingvoltage)]);    
         writeline(waveformGenerator, 'OUTPUT1 ON');
 
         while txThermo < txTemp - 0.5
@@ -74,7 +84,7 @@ for voltagenum = 1:length(voltages)
     end
 
     % wait for transducer to cool if needed
-    while txThermo > txTemp + 0.5
+    while txThermo > txTemp + 0.5 % upper bound of transducer temperature
         pause(1);
         % measure transducer temperature
         tdat = usbtc08query(t_handle);
@@ -87,7 +97,8 @@ for voltagenum = 1:length(voltages)
     end
 
     % turn transducer on to query voltage
-    writeline(waveformGenerator, ['SOUR1:VOLT ' num2str(voltages(voltagenum))]);    % Set amplitude [V]
+    % Set amplitude [V]
+    writeline(waveformGenerator, ['SOUR1:VOLT ' num2str(voltages(voltagenum))]);    
     writeline(waveformGenerator, 'OUTPUT1 ON');
     pause(2); % wait for signal to stabilize
 
@@ -114,6 +125,7 @@ usbtc08disconnect(t_handle);
 
 clear NRT t_handle tdat voltagenum loopnum
 
+% plot voltage vs. power, and temperature at time of Tx query
 figure;
 subplot(2,1,1)
 plot(voltages, AbsorbedPower);

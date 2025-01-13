@@ -1,4 +1,6 @@
-%% Script to record forward/absorbed/reflected power at a range of device
+% FREQSWEEPABSORBEDPOWER
+% 
+% Script to record forward/absorbed/reflected power at a range of device
 % driving frequencies. Ensure that the device is at the operating
 % temperature and insert a cryovial with relevant contents into the centre
 % of the cavity to ensure that the measurements are relevant to rewarming
@@ -6,14 +8,15 @@
 % to maintain approximately 4 W to maintain the transducer temperature
 %
 % Author: Rui Xu
-% Last Modified: 12/11/24
-
+% Date: 12/11/24
+% Last Modified: 13/01/25
 
 clearvars;
-%
+
 % connect to keysight signal generator 
 waveformGenerator = KeysightConnection();
 initAmplitude = 0.1; % [V]
+
 % Set amplitude [V]
 writeline(waveformGenerator, ['SOUR1:VOLT ' num2str(initAmplitude)]);    
 
@@ -76,7 +79,6 @@ for freqnum = 1:length(freqrange)
     fprintf(NRT, 'SENS0:DATA?');
     ReflectedPower(freqnum) = cell2mat(scanstr(NRT, ','));
 
-
     % turn source off
     writeline(waveformGenerator, 'OUTPUT1 OFF');
 
@@ -95,6 +97,8 @@ usbtc08disconnect(t_handle);
 fclose(NRT);
 clear NRT;
 
+% plot transducer temperature for each measurement. If unstable, modify
+% drive parameters
 figure;
 plot(freqrange, txTemperature)
 xlabel('Frequency [Hz]'); ylabel('Transducer Temperature [degC]')

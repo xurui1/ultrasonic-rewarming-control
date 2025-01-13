@@ -1,11 +1,15 @@
-%% Script to optimise transducer based on maximising the heating rate of a
-% thermocouple within a cryovial centered within the device cavity.
+% REWARMINGFREQSWEEP
+% 
+% Script to optimise transducer frequency based on maximising the heating 
+% rate of a thermocouple within a cryovial centered within the device cavity.
 % Effectively a frequency sweep with heating as the output metric. Caution
 % required for maintaining a constant device temperature. Time averaged
 % power should be approximately 4 Watts.
 %
-% Author: Rui Xu
-% Last Modified: 08/11/24
+% ABOUT:
+%     Author: Rui Xu
+%     Date: 08/11/24
+%     Last Modified: 13/01/25
 
 clearvars;
 
@@ -78,10 +82,6 @@ end
 clear waveformGenerator;
 usbtc08disconnect(t_handle);
 fclose(NRT);
-
-% save data 
-filename = 'XYZ.mat';
-save(filename, 'AbsorbedPower', 'freqrange', 'thermo1', 'thermo2', 'time')
 
 % plot results iteratively
  figure; 
