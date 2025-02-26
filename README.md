@@ -5,7 +5,9 @@ Control codes for the ultrasonic rewarming device developed at UCL for rewarming
 This folder contains a set of scripts to optimise the control of a tubular 
 transducer driven with a signal generator with the output power read by
 a power meter, and with transducer (and additional temperature sensors) 
-read by a TC-08 datalogger. 
+read by a TC-08 datalogger. This folder also contains a .zip folder 
+containing Solidworks part files and instructions used to assemble the
+ultrasonic rewarming device.
 
 Signal Generator: 33500B (Keysight)
 Amplifier: E&I 1020L 200W +53dB (E&I)
